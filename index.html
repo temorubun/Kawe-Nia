@@ -4,8 +4,406 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Kawe Nia • Layanan SKTM</title>
-  <!-- Pemanggilan style dari GitHub raw -->
-  <link rel="stylesheet" href="https://form.distrikwania.com/styles.css">
+  <style>
+    :root{
+      --bg:#0b1020;          /* latar belakang halaman */
+      --panel:#0f172a;       /* dasar kartu */
+      --ink:#e5e7eb;         /* teks utama */
+      --muted:#9ca3af;       /* teks sekunder */
+      --accent:#22c55e;      /* aksen hijau */
+      --accent-2:#38bdf8;    /* aksen biru */
+      --line:#1f2937;        /* garis tipis border */
+      --danger:#ef4444;
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --space: clamp(14px, 2.4vw, 22px);
+    }
+
+    /* ====== Reset kecil agar teks selalu wrap dan tidak terpotong ====== */
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% -10%, #16223f 0%, transparent 60%),
+        linear-gradient(145deg,#0a0e1a,#0f1933 55%,#0a0e1a);
+    }
+    /* Pastikan SEMUA elemen bisa mengecil dan membungkus teks panjang */
+    body, body *{
+      min-width:0;                   /* izinkan shrink di flex/grid */
+      overflow-wrap:anywhere;        /* bungkus kata sangat panjang/URL */
+      word-break:break-word;         /* jaga kalau ada string tanpa spasi */
+      white-space:normal;            /* jangan paksa satu baris */
+    }
+
+    .wrap{ max-width:1100px; margin:40px auto; padding:0 20px }
+
+    /* Header */
+    .topbar{ display:flex; align-items:center; gap:16px; margin-bottom:18px }
+    .brand{ display:flex; align-items:center; gap:12px; min-width:0 }
+    .brand img{
+      width:44px; height:44px; object-fit:cover; border-radius:10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.35)
+    }
+    .brand .title{ font-weight:700; font-size: clamp(16px,2.4vw,20px) }
+    .brand .sub{ font-size:12px; color:var(--muted) }
+    .pill{
+      margin-left:auto; display:flex; gap:8px; align-items:center; font-size:12px; color:#cbd5e1;
+      background:linear-gradient(180deg, rgba(56,189,248,.2), rgba(34,197,94,.15));
+      border:1px solid rgba(148,163,184,.3); padding:6px 10px; border-radius:999px;
+      flex-shrink:0;
+    }
+
+    /* Main Card */
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+      border:1px solid rgba(148,163,184,.2);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card-header{
+      display:flex; flex-wrap:wrap; gap:14px; align-items:center; justify-content:space-between;
+      padding: clamp(14px, 2.2vw, 20px) var(--space);
+      background:
+        radial-gradient(800px 300px at 10% -20%, rgba(56,189,248,.15), transparent 60%),
+        radial-gradient(600px 300px at 90% -30%, rgba(34,197,94,.18), transparent 55%);
+      border-bottom:1px solid rgba(148,163,184,.2);
+    }
+    /* Increased gap and added margin-bottom for better spacing */
+    .hgroup{ display:flex; flex-direction:column; gap:8px; min-width:0; margin-bottom:4px }
+    .h1{ font-size: clamp(18px, 2.8vw, 26px); font-weight:800; letter-spacing:.3px; margin-bottom:2px }
+    .h2{ font-size: 13px; color: var(--muted); margin-top:2px }
+    .badges{ display:flex; gap:8px; flex-wrap:wrap; min-width:0; margin-top:6px }
+    .badge{
+      font-size:12px; padding:6px 10px; border-radius:999px;
+      background:#0b1224; border:1px solid rgba(148,163,184,.26)
+    }
+    .badge.success{ border-color: rgba(34,197,94,.45); background: rgba(34,197,94,.12); color:#d1fae5 }
+    .badge.info{ border-color: rgba(56,189,248,.45); background: rgba(56,189,248,.12); color:#cffafe }
+
+    /* Content Grid */
+    .grid{
+      display:grid; grid-template-columns: 1.2fr .8fr; gap:0; min-height:360px;
+    }
+    @media (max-width: 960px){ .grid{ grid-template-columns: 1fr } }
+    @media (max-width: 960px){
+      .side{ background: transparent; }
+      .panel{ border-right: none; }
+    }
+
+    .panel{
+      padding: var(--space);
+      border-right:1px solid rgba(148,163,184,.16);
+    }
+    .panel:last-child{ border-right:none }
+
+    /* Section titles */
+    .stitle{
+      font-size:13px; letter-spacing:.4px; text-transform:uppercase;
+      color:#a5b4fc; font-weight:700; margin-bottom:10px
+    }
+
+    /* Identity table */
+    .ident{
+      display:grid;
+      grid-template-columns: 180px 12px 1fr; /* label : ':' : nilai */
+      gap:8px 12px; align-items:start; font-size:14px;
+      background: rgba(15,23,42,.55);
+      border:1px solid rgba(148,163,184,.15);
+      border-radius:14px; padding:14px;
+    }
+    /* Adaptasi label agar tidak memaksa potong saat layar kecil */
+    @media (max-width: 560px){
+      .ident{ grid-template-columns: 110px 10px 1fr }
+    }
+    .lab{ color:#cbd5e1 }
+    .sep{ color:#475569 }
+    .val{ color:#e5e7eb; font-weight:600; line-height:1.5 }
+
+    /* Keterangan list */
+    ol.ket{ margin:10px 0 0 18px; padding:0 }
+    ol.ket li{ margin:8px 0; line-height:1.5 }
+
+    .note{
+      margin-top:12px; font-size:12.5px; color:#a5b4fc;
+      background:rgba(99,102,241,.1);
+      border:1px dashed rgba(99,102,241,.35);
+      border-radius:12px; padding:10px 12px
+    }
+
+    /* Right panel: actions */
+    .side{
+      display:flex; flex-direction:column; gap:14px; padding: var(--space);
+      background: linear-gradient(180deg, rgba(2,6,23,.35), rgba(2,6,23,.15));
+    }
+    .callout{
+      border:1px solid rgba(56,189,248,.35); background: rgba(56,189,248,.1);
+      border-radius:14px; padding:12px 14px; font-size:13px; color:#e0f2fe
+    }
+    .actions{ display:flex; flex-wrap:wrap; gap:10px }
+    .btn{
+      appearance:none; border:none; cursor:pointer; font-weight:700; letter-spacing:.3px;
+      background:#0b1224; color:#e5e7eb; padding:10px 14px; border-radius:12px;
+      border:1px solid rgba(148,163,184,.3);
+    }
+    .btn.primary{
+      background: linear-gradient(180deg, rgba(34,197,94,.9), rgba(16,185,129,.9));
+      border-color: rgba(16,185,129,.9); color:#052e1a
+    }
+    .btn.ghost{ background: transparent }
+    .btn:active{ transform: translateY(1px) }
+
+    /* Edit mode styles */
+    .edit-mode .val {
+      display: none;
+    }
+    .edit-mode .edit-field {
+      display: block;
+    }
+    .edit-field {
+      display: none;
+      width: 100%;
+      background: rgba(15,23,42,.8);
+      border: 1px solid rgba(56,189,248,.4);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #e5e7eb;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .edit-field:focus {
+      outline: none;
+      border-color: rgba(56,189,248,.8);
+      box-shadow: 0 0 0 2px rgba(56,189,248,.2);
+    }
+    .edit-actions {
+      display: none;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .edit-mode .edit-actions {
+      display: flex;
+    }
+    .btn.success {
+      background: linear-gradient(180deg, rgba(34,197,94,.9), rgba(16,185,129,.9));
+      border-color: rgba(16,185,129,.9); 
+      color: #052e1a;
+    }
+    .btn.danger {
+      background: linear-gradient(180deg, rgba(239,68,68,.9), rgba(220,38,38,.9));
+      border-color: rgba(220,38,38,.9); 
+      color: #fef2f2;
+    }
+
+    /* File upload styles */
+    .file-upload-container {
+      background: rgba(15,23,42,.55);
+      border: 1px solid rgba(148,163,184,.15);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    
+    .file-info {
+      background: rgba(34,197,94,.1);
+      border: 1px solid rgba(34,197,94,.3);
+      border-radius: 8px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: #d1fae5;
+    }
+    
+    .file-info.error {
+      background: rgba(239,68,68,.1);
+      border-color: rgba(239,68,68,.3);
+      color: #fee2e2;
+    }
+    
+    .upload-progress {
+      width: 100%;
+      height: 4px;
+      background: rgba(148,163,184,.2);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    
+    .upload-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* Uploaded files styles */
+    .uploaded-files-container {
+      background: rgba(15,23,42,.55);
+      border: 1px solid rgba(148,163,184,.15);
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 60px;
+    }
+    
+    .no-files-message {
+      color: #9ca3af;
+      font-size: 13px;
+      text-align: center;
+      font-style: italic;
+    }
+    
+    .uploaded-file-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: rgba(34,197,94,.1);
+      border: 1px solid rgba(34,197,94,.3);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    
+    .uploaded-file-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .file-icon {
+      font-size: 16px;
+      color: #22c55e;
+      flex-shrink: 0;
+    }
+    
+    .file-details {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .file-name {
+      color: #d1fae5;
+      font-weight: 600;
+      margin-bottom: 2px;
+      word-break: break-all;
+    }
+    
+    .file-meta {
+      color: #a5b4fc;
+      font-size: 11px;
+    }
+    
+    .file-remove {
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.3);
+      color: #fee2e2;
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 10px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    
+    .file-remove:hover {
+      background: rgba(239,68,68,.2);
+    }
+
+    /* Footer */
+    .card-footer{
+      display:flex; gap:14px; justify-content:space-between; align-items:center;
+      padding: 12px var(--space); border-top:1px solid rgba(148,163,184,.2);
+      color:var(--muted); font-size:12px
+    }
+
+    /* Custom Popup Styles */
+    .popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    
+    .popup {
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border: 1px solid rgba(148,163,184,.3);
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,.5);
+      position: relative;
+      animation: popupSlideIn 0.3s ease-out;
+    }
+    
+    @keyframes popupSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    .popup-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    
+    .popup-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #e5e7eb;
+      margin-bottom: 15px;
+      letter-spacing: 0.5px;
+    }
+    
+    .popup-message {
+      font-size: 14px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+    
+    .popup-btn {
+      background: linear-gradient(180deg, rgba(34,197,94,.9), rgba(16,185,129,.9));
+      border: none;
+      color: #052e1a;
+      padding: 12px 30px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .popup-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px rgba(34,197,94,.3);
+    }
+    
+    .popup-btn:active {
+      transform: translateY(0);
+    }
+
+    /* Print */
+    @media print{
+      .side{ display:none }
+      body{ background:#fff }
+      .card{ border:none; box-shadow:none }
+      .pill{ display:none }
+      .popup-overlay{ display:none !important }
+    }
+  </style>
 </head>
 <body>
   <div class="wrap">
@@ -202,7 +600,460 @@
       <button class="popup-btn" onclick="closePopup()">OK</button>
     </div>
   </div>
-  <!-- Pindahkan script ke akhir body -->
-  <script src="https://form.distrikwania.com/script.js" defer></script>
+  <script>
+    // Skema baku (default)
+    const DEFAULT_ITEM = {
+      jenis_surat: '{{ $json.data[0].jenis_surat }}',
+      nomor_surat: '{{ $json.data[0].nomor_surat }}',
+      tanggal_surat: '{{ $json.data[0].tanggal_surat }}',
+      pemohon: {
+        nama: '{{ $json.data[0].pemohon.nama }}',
+        nik: '{{ $json.data[0].pemohon.nik }}',
+        ttl: '{{ $json.data[0].pemohon.ttl }}',
+        agama: '{{ $json.data[0].pemohon.agama }}',
+        jenis_kelamin: '{{ $json.data[0].pemohon.jenis_kelamin }}',
+        status_perkawinan: '{{ $json.data[0].pemohon.status_perkawinan }}',
+        pekerjaan: '{{ $json.data[0].pemohon.pekerjaan }}',
+        alamat: '{{ $json.data[0].pemohon.alamat }}',
+        kelurahan: '{{ $json.data[0].pemohon.kelurahan }}',
+        kecamatan: '{{ $json.data[0].pemohon.kecamatan }}',
+        kota_kab: '{{ $json.data[0].pemohon.kota_kab }}',
+        provinsi: '{{ $json.data[0].pemohon.provinsi }}',
+        domisili: '{{ $json.data[0].pemohon.domisili }}'
+      },
+      dokumen: {{ JSON.stringify($json.data[0].dokumen) }},
+      penandatangan: {
+        nama: '{{ $json.data[0].penandatangan.nama }}',
+        nip: '{{ $json.data[0].penandatangan.nip }}',
+        jabatan: '{{ $json.data[0].penandatangan.jabatan }}'
+      },
+      operator: '{{ $json.data[0].operator }}',
+      ref: '{{ $json.data[0].ref }}',
+      WAHA_Trigger_session: '{{ $json.data[0].WAHA_Trigger_session }}',
+      WAHA_Trigger_payload_from: '{{ $json.data[0].WAHA_Trigger_payload_from }}',
+      LogoURL: '{{ $json.data[0].LogoURL }}',
+      URL_CREATE: '{{ $json.data[0].URL_CREATE }}',
+      URL_UPDATE: '{{ $json.data[0].URL_UPDATE }}',
+      URL_DELETE: '{{ $json.data[0].URL_DELETE }}',
+      URL_UPLOAD: '{{ $json.data[0].URL_UPLOAD }}',
+      URL_DELETE_FILE: '{{ $json.data[0].URL_DELETE_FILE }}',
+      id_user: '{{ $json.id }}',
+      url_web_link: window.location.href,
+      files_info: {{ JSON.stringify($json.data[0].files_info) }}
+    };
+
+    // Controller untuk data
+    function createDataController() {
+      // Data utama, bisa diisi dari JSON
+      let data = [JSON.parse(JSON.stringify(DEFAULT_ITEM))];
+
+      // Fungsi untuk menambah dokumen baru
+      function addDokumen(itemIndex, dokumenBaru) {
+        data[itemIndex].dokumen.push(dokumenBaru);
+      }
+
+      // Fungsi untuk mengirim data saat tombol diklik
+      function sendAllData() {
+        // Contoh: kirim ke server, atau tampilkan di console
+        console.log('Data dikirim:', data);
+        // Tampilkan popup sukses
+        document.getElementById('popupOverlay').style.display = 'flex';
+      }
+
+      // Fungsi untuk menambah file_info
+      function addFileInfo(itemIndex, fileInfo) {
+        data[itemIndex].files_info.push(fileInfo);
+      }
+
+      return { addDokumen, sendAllData, addFileInfo, data };
+    }
+
+    // Inisialisasi controller
+    const dataController = createDataController();
+
+    // Contoh integrasi dengan tombol
+    function generateAndSendLetter() {
+      // Kirim semua data
+      dataController.sendAllData();
+    }
+
+    function deleteLetterAndData() {
+      // Reset data
+      dataController.data = [JSON.parse(JSON.stringify(DEFAULT_ITEM))];
+      alert('Surat dan data berhasil dihapus!');
+      // Sembunyikan popup jika ada
+      document.getElementById('popupOverlay').style.display = 'none';
+    }
+
+    function closePopup() {
+      document.getElementById('popupOverlay').style.display = 'none';
+    }
+
+    let selectedFiles = [];
+let uploadedFiles = [];
+
+
+    function updateUploadedFilesDisplay() {
+      const container = document.getElementById('uploadedFilesList');
+      const dokumenArray = dataController.data[0].dokumen || [];
+      if (!dokumenArray.length) {
+        container.innerHTML = '<div class="no-files-message">Belum ada file yang diupload</div>';
+        return;
+      }
+      const totalSize = dokumenArray.reduce((sum, file) => sum + (file.size || 0), 0);
+      let html = `
+        <div style="margin-bottom: 12px; padding: 8px 12px; background: rgba(56,189,248,.1); border: 1px solid rgba(56,189,248,.3); border-radius: 8px; font-size: 12px; color: #e0f2fe;">
+          📁 Total: <strong>${dokumenArray.length}</strong> file • 📏 Total ukuran: <strong>${formatFileSize(totalSize)}</strong>
+        </div>
+      `;
+      html += dokumenArray.map(doc => `
+        <div class="uploaded-file-item">
+          <div class="file-icon">${getFileIcon(doc.mimeType || 'unknown')}</div>
+          <div class="file-details">
+            <div class="file-name">
+              ${doc.view_url && doc.view_url !== '#' ? `<a href="${doc.view_url}" target="_blank" style="color: #22c55e; text-decoration: none;">${doc.name}</a>` : doc.name}
+            </div>
+            <div class="file-meta">
+              ${formatFileSize(doc.size || 0)}${doc.createdTime ? ' • ' + new Date(doc.createdTime).toLocaleString('id-ID') : ''}
+            </div>
+            ${doc.label ? `<div style="font-size: 10px; color: #22c55e; margin-top: 2px;">${doc.label}</div>` : ''}
+          </div>
+          <button class="file-remove" onclick="deleteFile('${doc.id || ''}')" title="Hapus file">
+            🗑️
+          </button>
+        </div>
+      `).join('');
+      container.innerHTML = html;
+    }
+
+    function getFileIcon(fileType) {
+      if (fileType.includes('pdf')) return '📄';
+      if (fileType.includes('image')) return '🖼️';
+      if (fileType.includes('word') || fileType.includes('document')) return '📝';
+      if (fileType.includes('excel') || fileType.includes('spreadsheet')) return '📊';
+      if (fileType.includes('powerpoint') || fileType.includes('presentation')) return '📽️';
+      if (fileType.includes('zip') || fileType.includes('rar') || fileType.includes('archive')) return '🗜️';
+      return '📎';
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    document.addEventListener('DOMContentLoaded', updateUploadedFilesDisplay);
+
+    // Fungsi untuk menghapus file
+    function deleteFile(fileId) {
+      if (!fileId) return;
+      
+      if (confirm('Apakah Anda yakin ingin menghapus file ini?')) {
+        // Hapus dari data controller
+        const dokumenArray = dataController.data[0].dokumen || [];
+        const index = dokumenArray.findIndex(doc => doc.id === fileId);
+        if (index !== -1) {
+          dokumenArray.splice(index, 1);
+          // Update tampilan
+          updateUploadedFilesDisplay();
+          
+          // Kirim ke server untuk menghapus file
+          fetch(dataController.data[0].URL_DELETE_FILE, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              file_id: fileId,
+              action: 'delete_file',
+              id_user: dataController.data[0].id_user
+            })
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success || data.status === 'success' || data.message === 'Workflow was started') {
+              console.log('File berhasil dihapus');
+            } else {
+              console.error('Gagal menghapus file:', data.message);
+            }
+          })
+          .catch(error => {
+            console.error('Error saat menghapus file:', error);
+          });
+        }
+      }
+    }
+
+function handleFileSelect(event) {
+  const files = Array.from(event.target.files);
+  const fileInfo = document.getElementById('fileInfo');
+  const uploadBtn = document.getElementById('uploadBtn');
+  if (files.length === 0) {
+    fileInfo.style.display = 'none';
+    uploadBtn.style.display = 'none';
+    selectedFiles = [];
+    return;
+  }
+  selectedFiles = [];
+  let validFiles = [];
+  let errorMessages = [];
+  files.forEach(file => {
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      errorMessages.push(`❌ ${file.name} terlalu besar (${(file.size / 1024 / 1024).toFixed(1)}MB). Maksimal 10MB.`);
+      return;
+    }
+    validFiles.push(file);
+    selectedFiles.push(file);
+  });
+  let infoHTML = '';
+  if (errorMessages.length > 0) infoHTML += errorMessages.join('<br>') + '<br>';
+  if (validFiles.length > 0) {
+    const totalSize = validFiles.reduce((sum, file) => sum + file.size, 0);
+    const fileList = validFiles.map(file => `• ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`).join('<br>');
+    infoHTML += `✅ ${validFiles.length} file dipilih:<br>${fileList}<br>📏 Total: ${(totalSize / 1024 / 1024).toFixed(2)}MB`;
+    uploadBtn.style.display = 'block';
+  } else {
+    uploadBtn.style.display = 'none';
+  }
+  if (infoHTML) {
+    fileInfo.innerHTML = infoHTML;
+    fileInfo.className = errorMessages.length > 0 ? 'file-info error' : 'file-info';
+    fileInfo.style.display = 'block';
+  } else {
+    fileInfo.style.display = 'none';
+  }
+}
+
+function uploadFiles() {
+  if (selectedFiles.length === 0) return;
+  const uploadBtn = document.getElementById('uploadBtn');
+  const fileInfo = document.getElementById('fileInfo');
+  const progressContainer = document.getElementById('uploadProgress');
+  const progressBar = document.getElementById('uploadProgressBar');
+  uploadBtn.disabled = true;
+  uploadBtn.textContent = '📤 Mengirim...';
+  progressContainer.style.display = 'block';
+  progressBar.style.width = '0%';
+
+  // Kirim data tetap + file
+  const payload = {
+    ...dataController.data[0], // Data tetap
+    action: 'upload_multiple',
+    timestamp: new Date().toISOString(),
+    files_count: selectedFiles.length,
+    files_info: selectedFiles.map(file => ({
+      name: file.name,
+      size: file.size,
+      type: file.type
+    }))
+  };
+
+  const formData = new FormData();
+  selectedFiles.forEach(file => {
+    formData.append('files', file);
+  });
+  formData.append('data', JSON.stringify(payload));
+
+  // Simulasi progress
+  let progress = 0;
+  const progressInterval = setInterval(() => {
+    progress += Math.random() * 30;
+    if (progress > 90) progress = 90;
+    progressBar.style.width = progress + '%';
+  }, 200);
+
+  fetch(dataController.data[0].URL_UPLOAD, {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    clearInterval(progressInterval);
+    progressBar.style.width = '100%';
+    setTimeout(() => {
+      if (data.success || data.status === 'success') {
+        selectedFiles.forEach(file => {
+          uploadedFiles.push({
+            id: Date.now().toString() + Math.random(),
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            uploadDate: new Date().toISOString(),
+            status: 'Berhasil diupload'
+          });
+        });
+        fileInfo.innerHTML = `✅ ${selectedFiles.length} file berhasil diunggah`;
+        fileInfo.className = 'file-info';
+        document.getElementById('fileInput').value = '';
+        selectedFiles = [];
+      } else {
+        // Jika pesan error adalah 'Workflow was started', tampilkan pesan sukses
+        if (data.message && data.message === 'Workflow was started') {
+          fileInfo.innerHTML = `✅ File berhasil dikirim, workflow sudah dimulai.`;
+          fileInfo.className = 'file-info';
+        } else {
+          fileInfo.innerHTML = `❌ Gagal mengunggah file: ${data.message || 'Unknown error'}`;
+          fileInfo.className = 'file-info error';
+        }
+      }
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = '📤 Kirim File';
+      uploadBtn.style.display = 'none';
+      progressContainer.style.display = 'none';
+    }, 500);
+  })
+  .catch(error => {
+    clearInterval(progressInterval);
+    fileInfo.innerHTML = `❌ Gagal mengunggah ${selectedFiles.length} file`;
+    fileInfo.className = 'file-info error';
+    uploadBtn.disabled = false;
+    uploadBtn.textContent = '📤 Kirim File';
+    progressContainer.style.display = 'none';
+  });
+}
+
+let isEditMode = false;
+let originalData = {};
+
+function toggleEditMode() {
+  const card = document.querySelector('.card');
+  const editBtn = document.getElementById('editBtn');
+  if (!isEditMode) {
+    // Masuk mode edit
+    card.classList.add('edit-mode');
+    editBtn.textContent = '👁️ Lihat Data';
+    editBtn.classList.remove('ghost');
+    editBtn.classList.add('info');
+    // Simpan data asli
+    originalData = {
+      nama: document.querySelector('#editNama').value,
+      nik: document.querySelector('#editNIK').value,
+      ttl: document.querySelector('#editTTL').value,
+      agama: document.querySelector('#editAgama').value,
+      jenisKelamin: document.querySelector('#editJenisKelamin').value,
+      statusPerkawinan: document.querySelector('#editStatusPerkawinan').value,
+      pekerjaan: document.querySelector('#editPekerjaan').value,
+      alamat: document.querySelector('#editAlamat').value,
+      kelurahan: document.querySelector('#editKelurahan').value,
+      kecamatan: document.querySelector('#editKecamatan').value,
+      kota_kab: document.querySelector('#editKotaKab').value,
+      provinsi: document.querySelector('#editProvinsi').value
+    };
+    isEditMode = true;
+  } else {
+    // Keluar mode edit
+    card.classList.remove('edit-mode');
+    editBtn.textContent = '✏️ Edit Data';
+    editBtn.classList.remove('info');
+    editBtn.classList.add('ghost');
+    isEditMode = false;
+    // Segera tampilkan perubahan di UI tanpa menunggu respon server
+    updatePemohonUI();
+  }
+}
+
+function cancelEdit() {
+  // Pulihkan data asli
+  document.querySelector('#editNama').value = originalData.nama || '-';
+  document.querySelector('#editNIK').value = originalData.nik || '-';
+  document.querySelector('#editTTL').value = originalData.ttl || '-';
+  document.querySelector('#editAgama').value = originalData.agama || '-';
+  document.querySelector('#editJenisKelamin').value = originalData.jenisKelamin || '-';
+  document.querySelector('#editStatusPerkawinan').value = originalData.statusPerkawinan || '-';
+  document.querySelector('#editPekerjaan').value = originalData.pekerjaan || '-';
+  document.querySelector('#editAlamat').value = originalData.alamat || '-';
+  document.querySelector('#editKelurahan').value = originalData.kelurahan || '-';
+  document.querySelector('#editKecamatan').value = originalData.kecamatan || '-';
+  document.querySelector('#editKotaKab').value = originalData.kota_kab || '-';
+  document.querySelector('#editProvinsi').value = originalData.provinsi || '-';
+  // Keluar mode edit
+  toggleEditMode();
+  // Segera tampilkan perubahan di UI tanpa menunggu respon server
+  updatePemohonUI();
+}
+
+// Fungsi Simpan Perubahan agar tombol berfungsi seperti di template 2
+function saveChanges() {
+  const updatedData = {
+    nama: document.querySelector('#editNama').value,
+    nik: document.querySelector('#editNIK').value,
+    ttl: document.querySelector('#editTTL').value,
+    agama: document.querySelector('#editAgama').value,
+    jenis_kelamin: document.querySelector('#editJenisKelamin').value,
+    status_perkawinan: document.querySelector('#editStatusPerkawinan').value,
+    pekerjaan: document.querySelector('#editPekerjaan').value,
+    alamat: document.querySelector('#editAlamat').value,
+    kelurahan: document.querySelector('#editKelurahan').value,
+    kecamatan: document.querySelector('#editKecamatan').value,
+    kota_kab: document.querySelector('#editKotaKab').value,
+    provinsi: document.querySelector('#editProvinsi').value
+  };
+
+  // Update dataController agar data tetap sinkron
+  dataController.data[0].pemohon = { ...updatedData };
+  updatePemohonUI();
+  // Langsung keluar mode edit
+  toggleEditMode();
+  // Kirim data ke server (aktif)
+  fetch(dataController.data[0].URL_UPDATE, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'update',
+      id_user: dataController.data[0].id_user,
+      data_sebelum: originalData,
+      data_sesudah: updatedData
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Tampilkan popup atau notifikasi jika perlu
+    alert('Perubahan berhasil disimpan!');
+  })
+  .catch(error => {
+    alert('Gagal menyimpan perubahan!');
+    console.error(error);
+  });
+// Fungsi untuk update UI pemohon setelah edit
+function updatePemohonUI() {
+  // Ambil data dari input edit
+  const nama = document.querySelector('#editNama').value;
+  const nik = document.querySelector('#editNIK').value;
+  const ttl = document.querySelector('#editTTL').value;
+  const agama = document.querySelector('#editAgama').value;
+  const jenisKelamin = document.querySelector('#editJenisKelamin').value;
+  const statusPerkawinan = document.querySelector('#editStatusPerkawinan').value;
+  const pekerjaan = document.querySelector('#editPekerjaan').value;
+  const alamat = document.querySelector('#editAlamat').value;
+  const kelurahan = document.querySelector('#editKelurahan').value;
+  const kecamatan = document.querySelector('#editKecamatan').value;
+  const kota_kab = document.querySelector('#editKotaKab').value;
+  const provinsi = document.querySelector('#editProvinsi').value;
+
+  // Update tampilan
+  document.querySelector('#nama').textContent = nama;
+  document.querySelector('#nik').textContent = nik;
+  document.querySelector('#ttl').textContent = ttl;
+  document.querySelector('#agama').textContent = agama;
+  document.querySelector('#jenis_kelamin').textContent = jenisKelamin;
+  document.querySelector('#status_perkawinan').textContent = statusPerkawinan;
+  document.querySelector('#pekerjaan').textContent = pekerjaan;
+  document.querySelector('#alamat').textContent = alamat;
+  document.querySelector('#kelurahan').textContent = kelurahan;
+  document.querySelector('#kecamatan').textContent = kecamatan;
+  document.querySelector('#kota_kab').textContent = kota_kab;
+  document.querySelector('#provinsi').textContent = provinsi;
+
+  // Update dataController juga agar data tetap sinkron
+  dataController.data[0].pemohon = {
+    nama, nik, ttl, agama, jenis_kelamin: jenisKelamin, status_perkawinan: statusPerkawinan,
+    pekerjaan, alamat, kelurahan, kecamatan, kota_kab, provinsi
+  };
+}
+}
+  </script>
 </body>
 </html>
